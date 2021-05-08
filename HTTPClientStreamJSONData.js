@@ -6,7 +6,7 @@ module.exports = class HTTPClientStreamJSONData {
     this.district_id = 395;
     this.date = date;
     this.searchParams = new URLSearchParams(
-      `district_id=${this.district_id}&date=${this.date}&&vaccine=COVISHIELD`
+      `district_id=${this.district_id}&date=${this.date}&vaccine=COVISHIELD`
     );
   }
   getDataStream() {

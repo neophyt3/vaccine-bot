@@ -73,19 +73,26 @@ const filterByAvailability = new Transform({
 });
 
 const data = [
-  ["Hospital Name", "Address", "Available Capacity", "Type", "Age Group+"],
+  [
+    "Hospital Name",
+    "Address",
+    "Available Capacity",
+    "Type",
+    "Date",
+    "Age Group+",
+  ],
 ];
 
 const collectAndTabularize = new Transform({
   writableObjectMode: true,
   encoding: "utf-8",
   transform(center, enc, done) {
-    // console.log(center);
     data.push([
       center.name,
       center.address,
       center.sessions.available_capacity,
       center.fee_type,
+      center.sessions.date,
       center.sessions.min_age_limit,
     ]);
     done();
@@ -96,8 +103,11 @@ const collectAndTabularize = new Transform({
   },
 });
 
+// const url =
+//   "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=395&date=08-05-2021";
+
 const url =
-  "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=395&date=08-05-2021";
+  "https://cdn-api.co-vin.in/api/v2/appointment/sessions/calendarByDistrict";
 
 (async () => {
   try {
@@ -105,6 +115,7 @@ const url =
       url,
       "09-05-2021"
     ).getDataStream();
+    console.log(new Date());
     await pipeline(
       jsonData$,
       responseCollector,
