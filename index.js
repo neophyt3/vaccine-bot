@@ -2,6 +2,8 @@ const { pipeline } = require("stream/promises");
 const { Transform } = require("stream");
 const unwind = require("javascript-unwind");
 const { table } = require("table");
+const notifier = require("node-notifier");
+require("dotenv").config();
 
 const HTTPClientStreamJSONData = require("./HTTPClientStreamJSONData");
 
@@ -38,13 +40,30 @@ const filterLocation = new Transform({
   transform(center, enc, done) {
     if (center?.address) {
       if (
-        ["kandivali", "malad", "borivali", "parle"].some((l) =>
+        process.env.LOCATION_FILTER.split(",").some((l) =>
           center.address.toLowerCase().includes(l)
         )
       ) {
         this.push(center);
       }
     }
+    done();
+  },
+});
+
+const availabilityNotifier = new Transform({
+  objectMode: true,
+  transform(center, enc, done) {
+    if (
+      ["kandivali", "malad", "borivali", "vile"].some((l) =>
+        center.address.toLowerCase().includes(l)
+      )
+    ) {
+      notifier.notify(
+        `(${center.sessions.available_capacity} Available) ${center.name}`
+      );
+    }
+    this.push(center);
     done();
   },
 });
@@ -82,7 +101,6 @@ const data = [
     "Age Group+",
   ],
 ];
-
 const collectAndTabularize = new Transform({
   writableObjectMode: true,
   encoding: "utf-8",
@@ -103,26 +121,18 @@ const collectAndTabularize = new Transform({
   },
 });
 
-// const url =
-//   "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=395&date=08-05-2021";
-
-const url =
-  "https://cdn-api.co-vin.in/api/v2/appointment/sessions/calendarByDistrict";
-
 (async () => {
   try {
-    const jsonData$ = await new HTTPClientStreamJSONData(
-      url,
-      "09-05-2021"
-    ).getDataStream();
+    const jsonData$ = await new HTTPClientStreamJSONData().getDataStream();
     console.log(new Date());
     await pipeline(
       jsonData$,
       responseCollector,
       destructureCentres,
-      //   filterLocation,
+      filterLocation,
       unwindCenterSession,
       filterByAvailability,
+      availabilityNotifier,
       collectAndTabularize,
       process.stdout
     );

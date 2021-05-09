@@ -1,12 +1,15 @@
 const https = require("https");
 
+const { DISTRICT_ID, DATE, VACCINE_TYPE, LINK, AUTH } = process.env;
+
 module.exports = class HTTPClientStreamJSONData {
-  constructor(link, date) {
-    this.link = new URL(link);
-    this.district_id = 395;
-    this.date = date;
+  constructor() {
+    this.link = new URL(LINK);
+    this.district_id = DISTRICT_ID;
+    this.date = DATE;
+    this.vaccine_type = VACCINE_TYPE;
     this.searchParams = new URLSearchParams(
-      `district_id=${this.district_id}&date=${this.date}&vaccine=COVISHIELD`
+      `district_id=${this.district_id}&date=${this.date}&vaccine=${this.vaccine_type}`
     );
   }
   getDataStream() {
@@ -18,7 +21,7 @@ module.exports = class HTTPClientStreamJSONData {
           path: this.link.pathname + "?" + this.searchParams.toString(),
           headers: {
             authority: "cdn-api.co-vin.in",
-            authorization: "",
+            authorization: AUTH,
             accept: "application/json, text/plain, */*",
             "user-agent":
               "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36 Edg/90.0.818.51",
