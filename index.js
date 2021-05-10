@@ -55,7 +55,7 @@ const availabilityNotifier = new Transform({
   objectMode: true,
   transform(center, enc, done) {
     if (
-      ["kandivali", "malad", "borivali", "vile"].some((l) =>
+      process.env.LOCATION_FILTER.split(",").some((l) =>
         center.address.toLowerCase().includes(l)
       )
     ) {
