@@ -57,7 +57,8 @@ const availabilityNotifier = new Transform({
     if (
       process.env.LOCATION_FILTER.split(",").some((l) =>
         center.address.toLowerCase().includes(l)
-      )
+      ) &&
+      center.sessions.available_capacity > 0
     ) {
       notifier.notify(
         `(${center.sessions.available_capacity} Available) ${center.name}`
